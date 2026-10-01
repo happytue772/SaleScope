@@ -1,0 +1,7 @@
+# Oracle JDBC configuration example.
+# Copy this file to db.properties and replace the password locally.
+db.driver=oracle.jdbc.OracleDriver
+db.url=jdbc:oracle:thin:@//localhost:1521/orcl
+db.user=SALESCOPE
+db.password=CHANGE_ME
+

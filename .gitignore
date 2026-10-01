@@ -1,0 +1,14 @@
+# Maven build output
+**/target/
+*.class
+
+# Runtime logs
+*.log
+logs/
+
+# Local database credentials
+salescope-web/src/main/resources/db.properties
+
+# Operating-system files
+.DS_Store
+Thumbs.db

@@ -18,6 +18,7 @@ import com.salescope.dto.DashboardSummaryDTO;
 import com.salescope.dto.DataQualityStatDTO;
 import com.salescope.dto.DatasetDTO;
 import com.salescope.dto.MonthlySalesStatDTO;
+import com.salescope.service.DataQualitySummaryService;
 import com.salescope.service.DashboardService;
 
 @WebServlet(
@@ -29,6 +30,8 @@ public class DashboardServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     private DashboardService dashboardService;
+    private final DataQualitySummaryService qualitySummaryService =
+        new DataQualitySummaryService();
 
     @Override
     public void init() throws ServletException {
@@ -96,6 +99,8 @@ public class DashboardServlet extends HttpServlet {
 
             request.setAttribute("monthlyStats", monthlyStats);
             request.setAttribute("qualityStats", qualityStats);
+            request.setAttribute("qualitySummary",
+                qualitySummaryService.summarize(qualityStats));
             request.setAttribute("dashboardSummary", summary);
 
             // 기존 JSP 속성명도 함께 유지한다.
@@ -196,6 +201,8 @@ public class DashboardServlet extends HttpServlet {
             Collections.<DataQualityStatDTO>emptyList()
         );
         request.setAttribute("dashboardSummary", DashboardSummaryDTO.empty());
+        request.setAttribute("qualitySummary",
+            qualitySummaryService.summarize(Collections.<DataQualityStatDTO>emptyList()));
         request.setAttribute("totalGrossSales", BigDecimal.ZERO);
         request.setAttribute("totalNetSales", BigDecimal.ZERO);
         request.setAttribute("totalSoldQuantity", 0L);

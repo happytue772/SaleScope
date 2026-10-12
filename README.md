@@ -22,9 +22,11 @@ SaleScope는 온라인 리테일 거래 데이터를 Hadoop MapReduce로 집계�
 - 데이터셋·분석 작업 선택형 대시보드
 - 총매출, 순매출, 판매수량, 취소금액 요약
 - 월별 매출 기간 조회 및 상세 결과
+- 선택 기간의 월별 결과 CSV 다운로드
 - 상품명·상품코드·매출 조건 검색
 - 상품별 결과 CSV 다운로드
 - TOP 5 상품과 월별 추이 시각화
+- 배타적 거래 분류 기준의 반영·제외 건수와 제외율 요약
 - Hadoop 월별·상품별 결과를 Oracle에 적재
 
 ## 기술 구성
@@ -85,7 +87,8 @@ SaleScope/
 |---|---|---|
 | `/dashboard` | GET | 데이터셋·분석 작업별 요약 대시보드 |
 | `/monthly-sales` | GET | 월별 매출 조회 |
-| `/product-sales` | GET | 상품별 매출 검색·정렬·페이징 |
+| `/monthly-sales/csv` | GET | 선택 기간의 월별 결과 CSV 다운로드 |
+| `/product-sales` | GET | 상품별 매출 검색·정렬·조회 건수 제한(최대 500건) |
 | `/product-sales/csv` | GET | 상품별 조회 결과 CSV 다운로드 |
 | `/visualization` | GET | 상품 TOP 5 및 월별 추이 시각화 |
 | `/result/import` | POST | 월별·상품별 Hadoop 결과 적재 |

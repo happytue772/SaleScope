@@ -95,6 +95,11 @@ monthly-sales.jsp
                     <button class="button button--primary" type="submit">
                         기간 조회
                     </button>
+                    <button class="button button--success" type="submit"
+                        formaction="${pageContext.request.contextPath}/monthly-sales/csv"
+                        formmethod="get">
+                        CSV 다운로드
+                    </button>
                     <a class="button button--ghost"
                         href="${pageContext.request.contextPath}/monthly-sales?jobId=${jobId}">
                         초기화

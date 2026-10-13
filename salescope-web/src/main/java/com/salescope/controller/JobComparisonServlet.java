@@ -13,10 +13,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.salescope.dto.AnalysisJobDTO;
 import com.salescope.dto.DatasetDTO;
-import com.salescope.dto.MonthlySalesStatDTO;
 import com.salescope.service.DashboardService;
 import com.salescope.service.JobComparisonService;
-import com.salescope.service.MonthlySalesChangeService;
+import com.salescope.service.ProductConcentrationService;
+import com.salescope.service.ProductSalesService;
 
 @WebServlet("/job-comparison")
 public class JobComparisonServlet extends HttpServlet {
@@ -25,8 +25,10 @@ public class JobComparisonServlet extends HttpServlet {
     private final DashboardService dashboardService = new DashboardService();
     private final JobComparisonService comparisonService =
         new JobComparisonService();
-    private final MonthlySalesChangeService changeService =
-        new MonthlySalesChangeService();
+    private final ProductSalesService productSalesService =
+        new ProductSalesService();
+    private final ProductConcentrationService concentrationService =
+        new ProductConcentrationService();
 
     @Override
     protected void doGet(HttpServletRequest request,
@@ -79,14 +81,11 @@ public class JobComparisonServlet extends HttpServlet {
             if (jobs.isEmpty()) {
                 request.setAttribute("message", "결과 적재가 끝난 Job이 없습니다.");
             } else if (jobs.size() == 1) {
-                List<MonthlySalesStatDTO> monthlyStats =
-                    dashboardService.getMonthlyStats(firstJobId);
                 request.setAttribute("singleJobMode", Boolean.TRUE);
-                request.setAttribute("monthlyStats", monthlyStats);
-                request.setAttribute("monthlyChanges",
-                    changeService.calculate(monthlyStats));
+                request.setAttribute("concentration", concentrationService.summarize(
+                    productSalesService.getPositiveNetSalesForConcentration(firstJobId)));
                 request.setAttribute("message",
-                    "적재 완료된 Job이 하나라 해당 Job의 월별 변화를 보여줍니다. 서로 다른 Job 간 비교는 두 번째 Job의 결과를 적재한 뒤 이용할 수 있습니다.");
+                    "적재 완료된 Job이 하나라 상품 매출 집중도를 보여줍니다. Job 간 비교는 두 번째 Job의 결과를 적재한 뒤 이용할 수 있습니다.");
             } else if (firstJobId.equals(secondJobId)) {
                 request.setAttribute("message", "서로 다른 Job을 선택해 주세요.");
             } else {

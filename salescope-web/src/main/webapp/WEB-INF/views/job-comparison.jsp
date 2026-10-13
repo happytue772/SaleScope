@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/salescope.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/job-comparison.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/job-comparison.css?v=20261013-1">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -27,7 +27,7 @@
             <div>
                 <p class="eyebrow">JOB COMPARISON</p>
                 <h1>분석 Job 비교</h1>
-                <p class="page-description">Job이 하나면 월별 변화를 보고, 둘 이상이면 공통 월 기준으로 서로 비교합니다.</p>
+                <p class="page-description">Job이 하나면 상품 매출 집중도를 보고, 둘 이상이면 공통 월 기준으로 서로 비교합니다.</p>
             </div>
             <a class="button button--secondary" href="${pageContext.request.contextPath}/dashboard">대시보드</a>
         </section>
@@ -68,7 +68,7 @@
                     </div>
                 </c:if>
                 <div class="form-actions">
-                    <button class="button button--primary" type="submit">${fn:length(jobs) > 1 ? '비교하기' : '월별 변화 보기'}</button>
+                    <button class="button button--primary" type="submit">${fn:length(jobs) > 1 ? '비교하기' : '상품 집중도 보기'}</button>
                 </div>
             </form>
         </section>
@@ -77,60 +77,63 @@
 
         <c:if test="${singleJobMode}">
             <c:choose>
-                <c:when test="${empty monthlyStats}">
-                    <div class="notice">이 Job에 표시할 월별 매출 결과가 없습니다.</div>
+                <c:when test="${empty concentration.topRows}">
+                    <div class="notice">양수 순매출이 있는 상품 결과가 없습니다. 상품별 결과 적재 상태를 확인해 주세요.</div>
                 </c:when>
                 <c:otherwise>
                     <p class="chart-description comparison-note">
-                        Job #<c:out value="${firstJobId}" />의 월별 결과입니다.
-                        전월 대비 수치는 연속된 두 달에만 표시하며, 직전 달 순매출이 0 이하이면 변화율을 계산하지 않습니다.
+                        Job #<c:out value="${firstJobId}" />에서 순매출이 0보다 큰 상품 전체를 분모로 계산했습니다.
+                        순매출 0 이하 상품은 제외합니다. A는 상품을 더하기 전 누적 비중이 80% 미만,
+                        B는 80~95% 미만, C는 그 이후입니다.
                     </p>
-                    <p><a class="button button--secondary" href="${pageContext.request.contextPath}/visualization?jobId=${firstJobId}">취소금액 시나리오 보기</a></p>
-                    <section class="panel chart-panel">
-                        <div class="panel-heading"><h2>월별 매출 추이</h2></div>
-                        <div class="chart-shell"><canvas id="monthlyTrendChart" role="img" aria-label="월별 매출 추이 그래프"></canvas></div>
+                    <section class="kpi-grid kpi-grid--four" aria-label="상품 매출 집중도 요약">
+                        <article class="kpi-card">
+                            <span class="kpi-card__label">분석 상품 수</span>
+                            <strong class="kpi-card__value"><fmt:formatNumber value="${concentration.productCount}" pattern="#,##0" /></strong>
+                        </article>
+                        <article class="kpi-card">
+                            <span class="kpi-card__label">양수 순매출 합계</span>
+                            <strong class="kpi-card__value"><fmt:formatNumber value="${concentration.positiveNetTotal}" pattern="#,##0.00" /></strong>
+                        </article>
+                        <article class="kpi-card">
+                            <span class="kpi-card__label">상위 5개 상품 비중</span>
+                            <strong class="kpi-card__value"><fmt:formatNumber value="${concentration.topFivePercent}" pattern="#,##0.00" />%</strong>
+                        </article>
+                        <article class="kpi-card">
+                            <span class="kpi-card__label">A / B / C 상품 수</span>
+                            <strong class="kpi-card__value"><c:out value="${concentration.gradeACount}" /> / <c:out value="${concentration.gradeBCount}" /> / <c:out value="${concentration.gradeCCount}" /></strong>
+                        </article>
                     </section>
                     <section class="panel chart-panel">
-                        <div class="panel-heading"><h2>전월 대비 순매출 변화율</h2></div>
-                        <div class="chart-shell"><canvas id="monthlyChangeChart" role="img" aria-label="전월 대비 순매출 변화율 그래프"></canvas></div>
-                        <p id="monthlyChangeChartStatus" class="chart-status" aria-live="polite"></p>
+                        <div class="panel-heading"><h2>상품별 누적 순매출 비중</h2></div>
+                        <p class="chart-description">순매출 상위 최대 20개 상품을 표시합니다. 기준선은 전체 상품 합계의 80%와 95%입니다.</p>
+                        <div class="chart-shell"><canvas id="concentrationChart" role="img" aria-label="상품별 누적 순매출 비중 그래프"></canvas></div>
+                        <p id="concentrationChartStatus" class="chart-status" aria-live="polite"></p>
                     </section>
                     <section class="panel">
-                        <div class="panel-heading"><h2>월별 상세 결과</h2></div>
+                        <div class="panel-heading"><h2>상위 20개 상품 상세</h2></div>
                         <div class="table-scroll">
-                            <table class="data-table comparison-table">
-                                <thead><tr><th>월</th><th>총매출</th><th>취소금액</th><th>순매출</th><th>전월 차이</th><th>변화율</th></tr></thead>
+                            <table class="data-table concentration-table">
+                                <thead><tr><th>코드</th><th>상품명</th><th>순매출</th><th>개별 비중</th><th>누적 비중</th><th>등급</th></tr></thead>
                                 <tbody>
-                                    <c:forEach var="item" items="${monthlyStats}">
+                                    <c:forEach var="row" items="${concentration.topRows}">
                                         <tr>
-                                            <td><c:out value="${item.salesMonth}" /></td>
-                                            <td><fmt:formatNumber value="${item.grossSales}" pattern="#,##0.00" /></td>
-                                            <td><fmt:formatNumber value="${item.cancelAmount}" pattern="#,##0.00" /></td>
-                                            <td><fmt:formatNumber value="${item.netSales}" pattern="#,##0.00" /></td>
-                                            <td>
-                                                <c:choose>
-                                                    <c:when test="${not empty monthlyChanges[item.salesMonth]}"><fmt:formatNumber value="${monthlyChanges[item.salesMonth].changeAmount}" pattern="+#,##0.00;-#,##0.00" /></c:when>
-                                                    <c:otherwise>—</c:otherwise>
-                                                </c:choose>
-                                            </td>
-                                            <td>
-                                                <c:choose>
-                                                    <c:when test="${not empty monthlyChanges[item.salesMonth].changePercent}"><fmt:formatNumber value="${monthlyChanges[item.salesMonth].changePercent}" pattern="+#,##0.00;-#,##0.00" />%</c:when>
-                                                    <c:otherwise>—</c:otherwise>
-                                                </c:choose>
-                                            </td>
+                                            <td><c:out value="${row.stockCode}" /></td>
+                                            <td><c:out value="${row.productName}" /></td>
+                                            <td><fmt:formatNumber value="${row.netSales}" pattern="#,##0.00" /></td>
+                                            <td><fmt:formatNumber value="${row.sharePercent}" pattern="#,##0.00" />%</td>
+                                            <td><fmt:formatNumber value="${row.cumulativePercent}" pattern="#,##0.00" />%</td>
+                                            <td><c:out value="${row.grade}" /></td>
                                         </tr>
                                     </c:forEach>
                                 </tbody>
                             </table>
                         </div>
                     </section>
-                    <div id="monthlyData" hidden>
-                        <c:forEach var="item" items="${monthlyStats}">
-                            <span class="data-row" data-month="${fn:escapeXml(item.salesMonth)}"
-                                data-gross="${item.grossSales}" data-cancel="${item.cancelAmount}"
-                                data-net="${item.netSales}"
-                                data-change-percent="${monthlyChanges[item.salesMonth].changePercent}"></span>
+                    <div id="concentrationData" hidden>
+                        <c:forEach var="row" items="${concentration.topRows}">
+                            <span class="data-row" data-code="${fn:escapeXml(row.stockCode)}"
+                                data-cumulative="${row.cumulativePercent}"></span>
                         </c:forEach>
                     </div>
                 </c:otherwise>
@@ -220,7 +223,7 @@
         </c:if>
     </main>
     <script src="${pageContext.request.contextPath}/assets/js/job-comparison.js"></script>
-    <script src="${pageContext.request.contextPath}/assets/js/visualization.js?v=20261013-2"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/concentration.js?v=20261013-1"></script>
     <script src="${pageContext.request.contextPath}/assets/js/theme.js"></script>
 </body>
 </html>

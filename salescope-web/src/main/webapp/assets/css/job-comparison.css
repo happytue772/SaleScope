@@ -15,6 +15,11 @@
     text-align: right;
 }
 
+.concentration-table th:nth-child(n+3),
+.concentration-table td:nth-child(n+3) {
+    text-align: right;
+}
+
 @media (max-width: 900px) {
     .comparison-charts {
         grid-template-columns: 1fr;

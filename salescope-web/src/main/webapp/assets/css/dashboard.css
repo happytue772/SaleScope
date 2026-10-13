@@ -35,6 +35,33 @@
     background: var(--color-danger-soft);
 }
 
+.scenario-controls {
+    display: grid;
+    gap: 12px;
+    margin: 20px 0 12px;
+    max-width: 420px;
+}
+
+.scenario-controls label {
+    font-weight: 600;
+}
+
+.scenario-controls output {
+    margin-left: 8px;
+    color: var(--color-primary, #137a55);
+}
+
+.scenario-controls input {
+    width: 100%;
+    accent-color: #137a55;
+}
+
+.scenario-summary {
+    margin: 12px 0 0;
+    line-height: 1.6;
+    font-weight: 600;
+}
+
 .kpi-card {
     transition: transform 160ms ease, box-shadow 160ms ease;
 }

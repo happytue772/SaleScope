@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SaleScope 시각화 대시보드</title>
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/assets/css/salescope.css">
-    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
+    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/assets/css/dashboard.css?v=20261013-1">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
     <link rel="stylesheet"
     href="${pageContext.request.contextPath}/assets/css/theme.css">
@@ -60,6 +60,18 @@
             <p id="monthlyChangeChartStatus" class="chart-status" aria-live="polite"></p>
         </section>
 
+        <section class="panel chart-panel" aria-labelledby="scenarioTitle">
+            <div class="panel-heading"><h2 id="scenarioTitle">취소금액 감소 시나리오</h2></div>
+            <p class="chart-description">현재 총매출은 그대로 두고 취소금액만 줄였다고 가정합니다. 실제 매출 예측은 아닙니다.</p>
+            <div class="scenario-controls">
+                <label for="cancelReduction">취소금액 감소율 <output id="cancelReductionValue" for="cancelReduction">25%</output></label>
+                <input id="cancelReduction" type="range" min="0" max="100" step="5" value="25">
+            </div>
+            <p id="scenarioSummary" class="scenario-summary" aria-live="polite"></p>
+            <div class="chart-shell"><canvas id="scenarioChart" role="img" aria-label="월별 실제 순매출과 시나리오 순매출 비교 그래프"></canvas></div>
+            <p id="scenarioStatus" class="chart-status" aria-live="polite"></p>
+        </section>
+
         <!-- 2. 자바스크립트에 전달할 데이터 은닉 영역 -->
         <div id="monthlyData" hidden>
             <c:forEach var="item" items="${monthlyStats}">
@@ -75,6 +87,7 @@
     </main>
 
     <script src="${pageContext.request.contextPath}/assets/js/visualization.js?v=20261013-2"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/scenario.js?v=20261013-1"></script>
     <script
     src="${pageContext.request.contextPath}/assets/js/theme.js">
 </script>

@@ -9,6 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SaleScope 시각화 대시보드</title>
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/assets/css/salescope.css">
+    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
     <link rel="stylesheet"
     href="${pageContext.request.contextPath}/assets/css/theme.css">
@@ -52,10 +53,17 @@
             <div class="chart-shell" style="height: 400px;"><canvas id="monthlyTrendChart"></canvas></div>
         </section>
 
+        <section class="panel chart-panel">
+            <div class="panel-heading"><h2>전월 대비 순매출 변화율</h2></div>
+            <p class="chart-description">연속된 월만 비교하며 직전 달 순매출이 0 이하이면 표시하지 않습니다.</p>
+            <div class="chart-shell"><canvas id="monthlyChangeChart" role="img" aria-label="전월 대비 순매출 변화율 막대 그래프"></canvas></div>
+            <p id="monthlyChangeChartStatus" class="chart-status" aria-live="polite"></p>
+        </section>
+
         <!-- 2. 자바스크립트에 전달할 데이터 은닉 영역 -->
         <div id="monthlyData" hidden>
             <c:forEach var="item" items="${monthlyStats}">
-                <span class="data-row" data-month="${fn:escapeXml(item.salesMonth)}" data-gross="${item.grossSales}" data-cancel="${item.cancelAmount}" data-net="${item.netSales}"></span>
+                <span class="data-row" data-month="${fn:escapeXml(item.salesMonth)}" data-gross="${item.grossSales}" data-cancel="${item.cancelAmount}" data-net="${item.netSales}" data-change-percent="${monthlyChanges[item.salesMonth].changePercent}"></span>
             </c:forEach>
         </div>
         

@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.salescope.dto.MonthlySalesStatDTO;
 import com.salescope.dto.ProductSalesStatDTO;
 import com.salescope.service.DashboardService;
+import com.salescope.service.MonthlySalesChangeService;
 import com.salescope.service.ProductSalesService;
 
 @WebServlet("/visualization")
@@ -19,6 +20,8 @@ public class VisualizationServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     private final DashboardService dashboardService = new DashboardService();
+    private final MonthlySalesChangeService changeService =
+        new MonthlySalesChangeService();
     private final ProductSalesService productSalesService = new ProductSalesService();
 
     @Override
@@ -44,6 +47,7 @@ public class VisualizationServlet extends HttpServlet {
 
             request.setAttribute("jobId", jobId);
             request.setAttribute("monthlyStats", monthlyStats);
+            request.setAttribute("monthlyChanges", changeService.calculate(monthlyStats));
             request.setAttribute("topProducts", topProducts);
 
             request.getRequestDispatcher("/WEB-INF/views/visualization.jsp").forward(request, response);

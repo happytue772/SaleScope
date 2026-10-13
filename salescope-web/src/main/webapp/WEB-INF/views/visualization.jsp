@@ -74,7 +74,7 @@
         </div>
     </main>
 
-    <script src="${pageContext.request.contextPath}/assets/js/visualization.js"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/visualization.js?v=20261013-2"></script>
     <script
     src="${pageContext.request.contextPath}/assets/js/theme.js">
 </script>

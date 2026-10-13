@@ -83,6 +83,8 @@
                     href="${pageContext.request.contextPath}/product-sales?jobId=${selectedJobId}">상품별 분석</a>
                 <a class="page-nav__link"
                     href="${pageContext.request.contextPath}/visualization?jobId=${selectedJobId}">시각화 대시보드</a>
+                <a class="page-nav__link"
+                    href="${pageContext.request.contextPath}/job-comparison?datasetId=${selectedDatasetId}&firstJobId=${selectedJobId}">Job 비교</a>
             </nav>
         </c:if>
 
@@ -187,6 +189,39 @@
                     </tbody>
                 </table>
             </div>
+        </section>
+
+        <section class="panel" aria-labelledby="qualitySummaryTitle">
+            <div class="panel-heading">
+                <h2 id="qualitySummaryTitle">거래 분류 요약</h2>
+                <p class="chart-description">선택한 Job의 배타적 거래 분류 6종 기준입니다.</p>
+            </div>
+            <c:choose>
+                <c:when test="${qualitySummary.totalRecords > 0}">
+                    <div class="kpi-grid kpi-grid--four">
+                        <article class="kpi-card">
+                            <span class="kpi-card__label">분류한 거래</span>
+                            <strong class="kpi-card__value"><fmt:formatNumber value="${qualitySummary.totalRecords}" pattern="#,##0" /></strong>
+                        </article>
+                        <article class="kpi-card kpi-card--positive">
+                            <span class="kpi-card__label">매출 집계 반영</span>
+                            <strong class="kpi-card__value"><fmt:formatNumber value="${qualitySummary.includedRecords}" pattern="#,##0" /></strong>
+                        </article>
+                        <article class="kpi-card kpi-card--danger">
+                            <span class="kpi-card__label">매출 집계 제외</span>
+                            <strong class="kpi-card__value"><fmt:formatNumber value="${qualitySummary.excludedRecords}" pattern="#,##0" /></strong>
+                        </article>
+                        <article class="kpi-card">
+                            <span class="kpi-card__label">집계 제외 비율</span>
+                            <strong class="kpi-card__value"><fmt:formatNumber value="${qualitySummary.excludedPercent}" pattern="#,##0.0" />%</strong>
+                        </article>
+                    </div>
+                    <p class="chart-description">반영: 정상·취소 거래 / 제외: 조정·가격 이상·미분류·파싱 오류. 설명·고객 ID 누락은 다른 거래 유형과 겹칠 수 있어 합계에서 제외했습니다.</p>
+                </c:when>
+                <c:otherwise>
+                    <p class="chart-description">표시할 거래 분류 결과가 없습니다.</p>
+                </c:otherwise>
+            </c:choose>
         </section>
 
         <!-- 데이터 품질 통계 영역 (유형 설명 추가 완료) -->

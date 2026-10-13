@@ -25,6 +25,7 @@ SaleScope는 온라인 리테일 거래 데이터를 Hadoop MapReduce로 집계�
 - 선택 기간의 월별 결과 CSV 다운로드
 - 월별 순매출의 전월 대비 변화액·변화율 표시 및 CSV 포함 (연속 월 기준)
 - 같은 데이터셋의 적재 완료 Job 2개를 공통 월 기준으로 비교 (순매출 추이·차이 그래프)
+- 적재 완료 Job이 하나일 때는 같은 비교 화면에서 해당 Job의 월별 매출 추이·전월 변화·상세 표 표시
 - 상품명·상품코드·매출 조건 검색
 - 상품별 결과 CSV 다운로드
 - TOP 5 상품과 월별 추이 시각화
@@ -95,7 +96,7 @@ SaleScope/
 | `/product-sales` | GET | 상품별 매출 검색·정렬·조회 건수 제한(최대 500건) |
 | `/product-sales/csv` | GET | 상품별 조회 결과 CSV 다운로드 |
 | `/visualization` | GET | 상품 TOP 5 및 월별 추이 시각화 |
-| `/job-comparison` | GET | 같은 데이터셋의 두 Job 공통 월 순매출 비교 |
+| `/job-comparison` | GET | Job 하나면 월별 변화, 둘 이상이면 같은 데이터셋의 두 Job 공통 월 순매출 비교 |
 | `/result/import` | POST | 월별·상품별 Hadoop 결과 적재 |
 
 ## 데이터베이스 설정

@@ -27,7 +27,7 @@
             <div>
                 <p class="eyebrow">JOB COMPARISON</p>
                 <h1>분석 Job 비교</h1>
-                <p class="page-description">같은 데이터셋의 적재 완료 Job을 공통 월 기준으로 비교합니다.</p>
+                <p class="page-description">Job이 하나면 월별 변화를 보고, 둘 이상이면 공통 월 기준으로 서로 비교합니다.</p>
             </div>
             <a class="button button--secondary" href="${pageContext.request.contextPath}/dashboard">대시보드</a>
         </section>
@@ -55,23 +55,87 @@
                         </c:forEach>
                     </select>
                 </div>
-                <div class="form-field">
-                    <label for="secondJobId">비교 Job</label>
-                    <select id="secondJobId" name="secondJobId">
-                        <c:forEach var="job" items="${jobs}">
-                            <option value="${job.jobId}" ${job.jobId == secondJobId ? 'selected' : ''}>
-                                Job #<c:out value="${job.jobId}" /> · <c:out value="${job.analysisVersion}" />
-                            </option>
-                        </c:forEach>
-                    </select>
-                </div>
+                <c:if test="${fn:length(jobs) > 1}">
+                    <div class="form-field">
+                        <label for="secondJobId">비교 Job</label>
+                        <select id="secondJobId" name="secondJobId">
+                            <c:forEach var="job" items="${jobs}">
+                                <option value="${job.jobId}" ${job.jobId == secondJobId ? 'selected' : ''}>
+                                    Job #<c:out value="${job.jobId}" /> · <c:out value="${job.analysisVersion}" />
+                                </option>
+                            </c:forEach>
+                        </select>
+                    </div>
+                </c:if>
                 <div class="form-actions">
-                    <button class="button button--primary" type="submit">비교하기</button>
+                    <button class="button button--primary" type="submit">${fn:length(jobs) > 1 ? '비교하기' : '월별 변화 보기'}</button>
                 </div>
             </form>
         </section>
 
         <c:if test="${not empty message}"><div class="notice"><c:out value="${message}" /></div></c:if>
+
+        <c:if test="${singleJobMode}">
+            <c:choose>
+                <c:when test="${empty monthlyStats}">
+                    <div class="notice">이 Job에 표시할 월별 매출 결과가 없습니다.</div>
+                </c:when>
+                <c:otherwise>
+                    <p class="chart-description comparison-note">
+                        Job #<c:out value="${firstJobId}" />의 월별 결과입니다.
+                        전월 대비 수치는 연속된 두 달에만 표시하며, 직전 달 순매출이 0 이하이면 변화율을 계산하지 않습니다.
+                    </p>
+                    <p><a class="button button--secondary" href="${pageContext.request.contextPath}/visualization?jobId=${firstJobId}">취소금액 시나리오 보기</a></p>
+                    <section class="panel chart-panel">
+                        <div class="panel-heading"><h2>월별 매출 추이</h2></div>
+                        <div class="chart-shell"><canvas id="monthlyTrendChart" role="img" aria-label="월별 매출 추이 그래프"></canvas></div>
+                    </section>
+                    <section class="panel chart-panel">
+                        <div class="panel-heading"><h2>전월 대비 순매출 변화율</h2></div>
+                        <div class="chart-shell"><canvas id="monthlyChangeChart" role="img" aria-label="전월 대비 순매출 변화율 그래프"></canvas></div>
+                        <p id="monthlyChangeChartStatus" class="chart-status" aria-live="polite"></p>
+                    </section>
+                    <section class="panel">
+                        <div class="panel-heading"><h2>월별 상세 결과</h2></div>
+                        <div class="table-scroll">
+                            <table class="data-table comparison-table">
+                                <thead><tr><th>월</th><th>총매출</th><th>취소금액</th><th>순매출</th><th>전월 차이</th><th>변화율</th></tr></thead>
+                                <tbody>
+                                    <c:forEach var="item" items="${monthlyStats}">
+                                        <tr>
+                                            <td><c:out value="${item.salesMonth}" /></td>
+                                            <td><fmt:formatNumber value="${item.grossSales}" pattern="#,##0.00" /></td>
+                                            <td><fmt:formatNumber value="${item.cancelAmount}" pattern="#,##0.00" /></td>
+                                            <td><fmt:formatNumber value="${item.netSales}" pattern="#,##0.00" /></td>
+                                            <td>
+                                                <c:choose>
+                                                    <c:when test="${not empty monthlyChanges[item.salesMonth]}"><fmt:formatNumber value="${monthlyChanges[item.salesMonth].changeAmount}" pattern="+#,##0.00;-#,##0.00" /></c:when>
+                                                    <c:otherwise>—</c:otherwise>
+                                                </c:choose>
+                                            </td>
+                                            <td>
+                                                <c:choose>
+                                                    <c:when test="${not empty monthlyChanges[item.salesMonth].changePercent}"><fmt:formatNumber value="${monthlyChanges[item.salesMonth].changePercent}" pattern="+#,##0.00;-#,##0.00" />%</c:when>
+                                                    <c:otherwise>—</c:otherwise>
+                                                </c:choose>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                    <div id="monthlyData" hidden>
+                        <c:forEach var="item" items="${monthlyStats}">
+                            <span class="data-row" data-month="${fn:escapeXml(item.salesMonth)}"
+                                data-gross="${item.grossSales}" data-cancel="${item.cancelAmount}"
+                                data-net="${item.netSales}"
+                                data-change-percent="${monthlyChanges[item.salesMonth].changePercent}"></span>
+                        </c:forEach>
+                    </div>
+                </c:otherwise>
+            </c:choose>
+        </c:if>
 
         <c:if test="${not empty comparison}">
             <c:choose>
@@ -156,6 +220,7 @@
         </c:if>
     </main>
     <script src="${pageContext.request.contextPath}/assets/js/job-comparison.js"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/visualization.js?v=20261013-2"></script>
     <script src="${pageContext.request.contextPath}/assets/js/theme.js"></script>
 </body>
 </html>

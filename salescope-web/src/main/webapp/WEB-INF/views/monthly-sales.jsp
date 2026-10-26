@@ -95,6 +95,11 @@ monthly-sales.jsp
                     <button class="button button--primary" type="submit">
                         기간 조회
                     </button>
+                    <button class="button button--success" type="submit"
+                        formaction="${pageContext.request.contextPath}/monthly-sales/csv"
+                        formmethod="get">
+                        CSV 다운로드
+                    </button>
                     <a class="button button--ghost"
                         href="${pageContext.request.contextPath}/monthly-sales?jobId=${jobId}">
                         초기화
@@ -137,6 +142,10 @@ monthly-sales.jsp
                     <c:out value="${fn:length(monthlyList)}" />건
                 </span>
             </div>
+            <p class="page-description">
+                전월 대비 값은 조회 결과에 직전 달이 있을 때 계산합니다.
+                직전 달 순매출이 0 이하이면 변화율은 표시하지 않습니다.
+            </p>
 
             <div class="table-scroll">
                 <table class="data-table">
@@ -150,19 +159,22 @@ monthly-sales.jsp
                             <th>취소수량</th>
                             <th>취소금액</th>
                             <th>순매출</th>
+                            <th>전월 대비 변화액</th>
+                            <th>전월 대비 변화율</th>
                         </tr>
                     </thead>
                     <tbody>
                         <c:choose>
                             <c:when test="${empty monthlyList}">
                                 <tr>
-                                    <td class="empty-cell" colspan="8">
+                                    <td class="empty-cell" colspan="10">
                                         조건에 해당하는 월별 통계가 없습니다.
                                     </td>
                                 </tr>
                             </c:when>
                             <c:otherwise>
                                 <c:forEach var="item" items="${monthlyList}">
+                                    <c:set var="change" value="${monthlyChanges[item.salesMonth]}" />
                                     <tr>
                                         <td><c:out value="${item.salesMonth}" /></td>
                                         <td><fmt:formatNumber value="${item.salesOrderCount}" pattern="#,##0" /></td>
@@ -172,6 +184,22 @@ monthly-sales.jsp
                                         <td><fmt:formatNumber value="${item.cancelQuantity}" pattern="#,##0" /></td>
                                         <td class="number-danger"><fmt:formatNumber value="${item.cancelAmount}" pattern="#,##0.00" /></td>
                                         <td class="number-positive"><fmt:formatNumber value="${item.netSales}" pattern="#,##0.00" /></td>
+                                        <td class="${not empty change and change.changeAmount lt 0 ? 'number-danger' : 'number-positive'}">
+                                            <c:choose>
+                                                <c:when test="${not empty change}">
+                                                    <fmt:formatNumber value="${change.changeAmount}" pattern="+#,##0.00;-#,##0.00" />
+                                                </c:when>
+                                                <c:otherwise>—</c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                        <td class="${not empty change and change.changePercent lt 0 ? 'number-danger' : 'number-positive'}">
+                                            <c:choose>
+                                                <c:when test="${not empty change and not empty change.changePercent}">
+                                                    <fmt:formatNumber value="${change.changePercent}" pattern="+#,##0.00;-#,##0.00" />%
+                                                </c:when>
+                                                <c:otherwise>—</c:otherwise>
+                                            </c:choose>
+                                        </td>
                                     </tr>
                                 </c:forEach>
                             </c:otherwise>

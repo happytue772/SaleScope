@@ -243,6 +243,34 @@ public class ProductSalesDAO {
         }
     }
 
+    /** 집중도 비율의 분모가 상위 N개로 잘리지 않도록 양수 순매출 상품 전체를 조회한다. */
+    public List<ProductSalesStatDTO> findPositiveNetSalesByJobId(long jobId)
+            throws SQLException {
+        if (jobId <= 0) {
+            throw new IllegalArgumentException("jobId는 1 이상이어야 합니다.");
+        }
+        String sql = "SELECT PS.JOB_ID, PS.STOCK_CODE, "
+            + "NVL(P.PRODUCT_NAME, PS.STOCK_CODE) AS PRODUCT_NAME, "
+            + "PS.SALES_ORDER_COUNT, PS.SOLD_QUANTITY, PS.GROSS_SALES, "
+            + "PS.CANCEL_ORDER_COUNT, PS.CANCEL_QUANTITY, PS.CANCEL_AMOUNT, "
+            + "PS.NET_QUANTITY, PS.NET_SALES "
+            + "FROM PRODUCT_SALES_STAT PS LEFT JOIN PRODUCT P "
+            + "ON P.STOCK_CODE = PS.STOCK_CODE "
+            + "WHERE PS.JOB_ID = ? AND PS.NET_SALES > 0 "
+            + "ORDER BY PS.NET_SALES DESC, PS.STOCK_CODE ASC";
+        List<ProductSalesStatDTO> results = new ArrayList<>();
+        try (Connection connection = DBConnectionUtil.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setLong(1, jobId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    results.add(mapRow(rs));
+                }
+            }
+        }
+        return results;
+    }
+
     /**
      * 화면의 검색창 자동완성(Datalist)을 위해 해당 Job의 모든 상품 목록을 조회합니다.
      */

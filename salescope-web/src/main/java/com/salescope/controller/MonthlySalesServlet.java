@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.salescope.dto.MonthlySalesPeriodDTO;
 import com.salescope.dto.MonthlySalesStatDTO;
+import com.salescope.service.MonthlySalesChangeService;
 import com.salescope.service.MonthlySalesService;
 
 @WebServlet("/monthly-sales")
@@ -20,6 +21,8 @@ public class MonthlySalesServlet extends HttpServlet {
 
     private final MonthlySalesService service =
         new MonthlySalesService();
+    private final MonthlySalesChangeService changeService =
+        new MonthlySalesChangeService();
 
     @Override
     protected void doGet(
@@ -68,6 +71,8 @@ public class MonthlySalesServlet extends HttpServlet {
                 availablePeriod.getEndMonth()
             );
             request.setAttribute("monthlyList", monthlyList);
+            request.setAttribute("monthlyChanges",
+                changeService.calculate(monthlyList));
             request.setAttribute(
                 "totalGrossSales",
                 service.calculateGrossSales(monthlyList)

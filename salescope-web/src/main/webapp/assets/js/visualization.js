@@ -2,13 +2,15 @@ document.addEventListener("DOMContentLoaded", function () {
     
     // 1. 월별 데이터 파싱
     const monthlyElements = document.querySelectorAll("#monthlyData .data-row");
-    const monthLabels = [], grossData = [], cancelData = [], netData = [];
+    const monthLabels = [], grossData = [], cancelData = [], netData = [], changeRates = [];
     
     monthlyElements.forEach(el => {
         monthLabels.push(el.getAttribute("data-month"));
         grossData.push(parseFloat(el.getAttribute("data-gross")) || 0);
         cancelData.push(parseFloat(el.getAttribute("data-cancel")) || 0);
         netData.push(parseFloat(el.getAttribute("data-net")) || 0);
+        const change = el.getAttribute("data-change-percent");
+        changeRates.push(change === "" ? null : Number(change));
     });
 
     // 2. 상품별 데이터 파싱
@@ -23,6 +25,12 @@ document.addEventListener("DOMContentLoaded", function () {
         productLabels.push(name);
         productNetData.push(parseFloat(el.getAttribute("data-net")) || 0);
     });
+
+    if (typeof Chart === "undefined") {
+        const status = document.getElementById("monthlyChangeChartStatus");
+        if (status) status.textContent = "차트 라이브러리를 불러오지 못했습니다. 월별 분석 표에서 변화율을 확인할 수 있습니다.";
+        return;
+    }
 
     // 공통 툴팁 포맷 (천단위 콤마)
     const tooltipFormat = {
@@ -82,5 +90,29 @@ document.addEventListener("DOMContentLoaded", function () {
             },
             options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: tooltipFormat } }
         });
+    }
+
+    if (document.getElementById("monthlyChangeChart")) {
+        new Chart(document.getElementById("monthlyChangeChart"), {
+            type: 'bar',
+            data: {
+                labels: monthLabels,
+                datasets: [{
+                    label: '전월 대비 순매출 변화율 (%)',
+                    data: changeRates,
+                    backgroundColor: changeRates.map(value => value !== null && value < 0 ? '#c2414b' : '#137a55')
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {callbacks: {label: context => context.parsed.y.toFixed(2) + '%'}}
+                }
+            }
+        });
+        if (changeRates.every(value => value === null)) {
+            document.getElementById("monthlyChangeChartStatus").textContent =
+                "비교 가능한 연속 월 데이터가 없습니다.";
+        }
     }
 });

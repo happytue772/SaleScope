@@ -55,6 +55,10 @@ public class ProductSalesService {
         return productSalesDAO
             .countByJobId(jobId);
     }
+    public List<ProductSalesStatDTO> getPositiveNetSalesForConcentration(long jobId)
+            throws SQLException {
+        return productSalesDAO.findPositiveNetSalesByJobId(jobId);
+    }
     public List<ProductSalesStatDTO> getDistinctProducts(long jobId) throws SQLException {
         return productSalesDAO.findDistinctProducts(jobId);
     }

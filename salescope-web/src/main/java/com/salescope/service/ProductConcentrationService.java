@@ -35,7 +35,8 @@ public class ProductConcentrationService {
         BigDecimal cumulative = BigDecimal.ZERO;
         BigDecimal topFive = BigDecimal.ZERO;
         int a = 0, b = 0, c = 0;
-        List<ProductConcentrationRowDTO> topRows = new ArrayList<>();
+        // 화면은 상위 20개만 보여주고, CSV에는 계산 대상 전체 상품을 담는다.
+        List<ProductConcentrationRowDTO> allRows = new ArrayList<>();
         for (int i = 0; i < products.size(); i++) {
             ProductSalesStatDTO row = products.get(i);
             String grade;
@@ -53,14 +54,12 @@ public class ProductConcentrationService {
                 topFive = topFive.add(row.getNetSales());
             }
             cumulative = cumulative.add(row.getNetSales());
-            if (i < 20) {
-                topRows.add(new ProductConcentrationRowDTO(
-                    row.getStockCode(), row.getProductName(), row.getNetSales(),
-                    percent(row.getNetSales(), total), percent(cumulative, total), grade));
-            }
+            allRows.add(new ProductConcentrationRowDTO(
+                row.getStockCode(), row.getProductName(), row.getNetSales(),
+                percent(row.getNetSales(), total), percent(cumulative, total), grade));
         }
         return new ProductConcentrationDTO(products.size(), a, b, c, total,
-            percent(topFive, total), topRows);
+            percent(topFive, total), allRows);
     }
 
     private BigDecimal percent(BigDecimal amount, BigDecimal total) {

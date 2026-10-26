@@ -84,7 +84,7 @@
                 <a class="page-nav__link"
                     href="${pageContext.request.contextPath}/visualization?jobId=${selectedJobId}">시각화 대시보드</a>
                 <a class="page-nav__link"
-                    href="${pageContext.request.contextPath}/job-comparison?datasetId=${selectedDatasetId}&firstJobId=${selectedJobId}">Job 비교</a>
+                    href="${pageContext.request.contextPath}/product-concentration?datasetId=${selectedDatasetId}&amp;jobId=${selectedJobId}">상품 집중도</a>
             </nav>
         </c:if>
 

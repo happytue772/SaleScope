@@ -2,6 +2,8 @@ package com.salescope.dto;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class ProductConcentrationDTO {
     private final int productCount;
@@ -10,18 +12,18 @@ public class ProductConcentrationDTO {
     private final int gradeCCount;
     private final BigDecimal positiveNetTotal;
     private final BigDecimal topFivePercent;
-    private final List<ProductConcentrationRowDTO> topRows;
+    private final List<ProductConcentrationRowDTO> allRows;
 
     public ProductConcentrationDTO(int productCount, int gradeACount,
             int gradeBCount, int gradeCCount, BigDecimal positiveNetTotal,
-            BigDecimal topFivePercent, List<ProductConcentrationRowDTO> topRows) {
+            BigDecimal topFivePercent, List<ProductConcentrationRowDTO> allRows) {
         this.productCount = productCount;
         this.gradeACount = gradeACount;
         this.gradeBCount = gradeBCount;
         this.gradeCCount = gradeCCount;
         this.positiveNetTotal = positiveNetTotal;
         this.topFivePercent = topFivePercent;
-        this.topRows = topRows;
+        this.allRows = Collections.unmodifiableList(new ArrayList<>(allRows));
     }
 
     public int getProductCount() { return productCount; }
@@ -30,5 +32,8 @@ public class ProductConcentrationDTO {
     public int getGradeCCount() { return gradeCCount; }
     public BigDecimal getPositiveNetTotal() { return positiveNetTotal; }
     public BigDecimal getTopFivePercent() { return topFivePercent; }
-    public List<ProductConcentrationRowDTO> getTopRows() { return topRows; }
+    public List<ProductConcentrationRowDTO> getTopRows() {
+        return allRows.subList(0, Math.min(20, allRows.size()));
+    }
+    public List<ProductConcentrationRowDTO> getAllRows() { return allRows; }
 }

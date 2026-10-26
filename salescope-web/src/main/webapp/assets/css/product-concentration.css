@@ -1,0 +1,13 @@
+.concentration-note {
+    margin-bottom: 18px;
+}
+
+.concentration-download {
+    display: inline-block;
+    margin: 0 0 18px;
+}
+
+.concentration-table th:nth-child(n+3),
+.concentration-table td:nth-child(n+3) {
+    text-align: right;
+}
